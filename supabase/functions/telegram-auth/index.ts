@@ -69,6 +69,7 @@ serve(async (req) => {
     if (!userStr) throw new Error('No user data in initData')
     const tgUser = JSON.parse(userStr)
     const telegramId = tgUser.id
+    console.log("Edge Function: Parsed telegramId:", telegramId, "type:", typeof telegramId);
 
     // 2. Look up driver in DB
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -81,14 +82,34 @@ serve(async (req) => {
       .eq('telegram_id', telegramId)
       .maybeSingle()
 
+    console.log("Edge Function: DB query result:", driver, "error:", error);
+
     if (error) throw error
     if (!driver || !driver.is_active) {
-      // Driver not found or not active. We still return success but no token, 
-      // letting the frontend handle the registration/verification flow or show error.
+      console.log("Edge Function: Driver not found or inactive. Returning is_verified: false");
+      
+      // Fetch a sample of drivers to see if we can find them and check their values
+      const { data: allDrivers } = await supabase
+        .from('drivers')
+        .select('id, full_name, telegram_id, is_active')
+        .limit(10);
+
       return new Response(JSON.stringify({ 
         success: true, 
         is_verified: false,
-        driver: driver || null
+        driver: driver || null,
+        debug: {
+          telegramId,
+          telegramIdType: typeof telegramId,
+          tgUser,
+          allDriversCount: allDrivers ? allDrivers.length : 0,
+          allDriversSample: allDrivers || [],
+          envKeys: {
+            hasUrl: !!supabaseUrl,
+            hasServiceKey: !!serviceRoleKey,
+            hasJwtSecret: !!Deno.env.get('JWT_SECRET')
+          }
+        }
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -131,6 +152,7 @@ serve(async (req) => {
     })
 
   } catch (error) {
+    console.error("Edge Function error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

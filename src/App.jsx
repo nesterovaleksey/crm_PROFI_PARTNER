@@ -11,6 +11,7 @@ export default function App() {
   const [tgUser, setTgUser] = useState(null); // tg user from Telegram SDK
   const [isTelegram, setIsTelegram] = useState(false);
   const [activeTab, setActiveTab] = useState('driver'); // 'driver' or 'admin'
+  const [authDebug, setAuthDebug] = useState(null);
 
   // 1. Initial Telegram Web App setup
   useEffect(() => {
@@ -60,10 +61,14 @@ export default function App() {
         setUser(result.driver || null);
       } else {
         setUser(null);
+        if (result.debug) {
+          setAuthDebug(result.debug);
+        }
       }
     } catch (err) {
       console.error('Error authenticating with Telegram:', err);
       setUser(null);
+      setAuthDebug({ error: err.message });
     } finally {
       setLoading(false);
     }
@@ -108,7 +113,15 @@ export default function App() {
             </div>
           </div>
         ) : !user ? (
-          <VerificationScreen tgUser={tgUser} onVerified={() => authenticateWithTelegram(window.Telegram?.WebApp?.initData)} />
+          <div className="space-y-4">
+            <VerificationScreen tgUser={tgUser} onVerified={() => authenticateWithTelegram(window.Telegram?.WebApp?.initData)} />
+            {authDebug && (
+              <div className="glass-card p-4 text-xs font-mono text-left bg-red-950/20 border border-red-900/50 rounded-xl space-y-2 overflow-auto max-h-60">
+                <p className="font-bold text-red-400">Диагностика авторизации:</p>
+                <pre className="text-[10px] text-red-200">{JSON.stringify(authDebug, null, 2)}</pre>
+              </div>
+            )}
+          </div>
         ) : !user.is_active ? (
           <div className="glass-card p-8 text-center my-10 space-y-5">
             <div className="w-16 h-16 rounded-full bg-[var(--danger-glow)] flex items-center justify-center mx-auto text-[var(--danger)]">
