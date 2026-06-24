@@ -3,15 +3,14 @@ import { supabase } from './supabaseClient';
 import VerificationScreen from './components/VerificationScreen';
 import MainMenu from './components/MainMenu';
 import AdminPanel from './components/AdminPanel';
-import { RefreshCw, ShieldAlert, Award } from 'lucide-react';
+import { RefreshCw, ShieldAlert, Send } from 'lucide-react';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null); // driver object from DB
-  const [tgUser, setTgUser] = useState(null); // tg user from SDK or mock
+  const [tgUser, setTgUser] = useState(null); // tg user from Telegram SDK
   const [isTelegram, setIsTelegram] = useState(false);
   const [activeTab, setActiveTab] = useState('driver'); // 'driver' or 'admin'
-  const [mockTgId, setMockTgId] = useState('');
 
   // 1. Initial Telegram Web App setup
   useEffect(() => {
@@ -23,15 +22,9 @@ export default function App() {
       setTgUser(tg.initDataUnsafe.user);
       checkUser(tg.initDataUnsafe.user.id);
     } else {
-      // Local development fallback
+      // Not inside Telegram — production: just show the "open in Telegram" screen
       setIsTelegram(false);
-      const savedMock = localStorage.getItem('mock_tg_id');
-      if (savedMock) {
-        setMockTgId(savedMock);
-        checkUser(parseInt(savedMock, 10));
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, []);
 
@@ -45,32 +38,12 @@ export default function App() {
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (data) {
-        setUser(data);
-      } else {
-        setUser(null);
-      }
+      setUser(data || null);
     } catch (err) {
       console.error('Error checking user:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMockLogin = (e) => {
-    e.preventDefault();
-    if (!mockTgId) return;
-    localStorage.setItem('mock_tg_id', mockTgId);
-    setTgUser({ id: parseInt(mockTgId, 10), first_name: 'Test', last_name: 'Driver' });
-    checkUser(parseInt(mockTgId, 10));
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('mock_tg_id');
-    setUser(null);
-    setTgUser(null);
-    setMockTgId('');
   };
 
   if (loading) {
@@ -84,54 +57,32 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] pb-10">
-      {/* Dev Simulator Panel */}
-      {!isTelegram && (
-        <div className="bg-[var(--bg-main)] border-b border-[var(--border-glass)] p-4 flex flex-wrap items-center justify-between gap-4 relative z-50">
-          <div className="flex items-center gap-2 text-[var(--warning)] font-semibold text-sm">
-            <ShieldAlert size={18} />
-            <span>Dev Simulator (Вне Telegram)</span>
-          </div>
-          {!tgUser ? (
-            <form onSubmit={handleMockLogin} className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Telegram User ID"
-                value={mockTgId}
-                onChange={(e) => setMockTgId(e.target.value)}
-                className="bg-[var(--bg-darker)] border border-[var(--border-glass)] px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-[var(--accent)]"
-                required
-              />
-              <button type="submit" className="btn-primary !py-1.5 !text-sm">
-                Войти
-              </button>
-            </form>
-          ) : (
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-[var(--text-muted)]">
-                Вошли как TG ID: <strong>{tgUser.id}</strong> {user ? `(Водитель: ${user.full_name})` : '(Не авторизован)'}
-              </span>
-              <button onClick={handleLogout} className="text-[var(--danger)] hover:underline">
-                Выйти
-              </button>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Main Container */}
       <main className="flex-1 max-w-xl w-full mx-auto px-4 pt-6">
-        {!tgUser ? (
-          <div className="glass-card p-8 text-center my-10 space-y-5">
+        {!isTelegram ? (
+          /* ── Открыто не в Telegram – боевой экран ── */
+          <div className="glass-card p-10 text-center my-10 space-y-6">
             <img
               src="https://static.tildacdn.net/tild3734-3735-4631-b565-616264303164/noroot.png"
               alt="PROFI Partner Logo"
               className="mx-auto"
-              style={{ height: '48px' }}
+              style={{ height: '52px' }}
             />
-            <h1 className="text-xl font-bold tracking-wider">PROFI Partner</h1>
-            <p className="text-xs text-[var(--text-muted)]">
-              Пожалуйста, откройте это приложение внутри Telegram-бота или введите Telegram ID в симуляторе выше.
-            </p>
+            <div>
+              <h1 className="text-xl font-bold tracking-wider mb-2">PROFI Partner</h1>
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                Это приложение работает только внутри Telegram.
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-light)] flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <Send className="text-white" size={26} />
+              </div>
+              <p className="text-xs text-[var(--text-dim)] max-w-xs">
+                Откройте приложение через Telegram-бота PROFI Partner, чтобы получить доступ к вашему личному кабинету.
+              </p>
+            </div>
           </div>
         ) : !user ? (
           <VerificationScreen tgUser={tgUser} onVerified={() => checkUser(tgUser.id)} />
@@ -144,14 +95,6 @@ export default function App() {
             <p className="text-xs text-[var(--text-muted)] text-center">
               Ваш аккаунт деактивирован администратором. Пожалуйста, обратитесь к руководству для восстановления доступа.
             </p>
-            {!isTelegram && (
-              <button 
-                onClick={handleLogout} 
-                className="w-full btn-secondary text-xs py-2 mt-4"
-              >
-                Выйти из симулятора
-              </button>
-            )}
           </div>
         ) : (
           <div>
@@ -168,7 +111,7 @@ export default function App() {
                   <p className="text-[10px] text-[var(--text-dim)] uppercase tracking-widest font-semibold">{user.full_name}</p>
                 </div>
               </div>
-              
+
               {user.is_admin && (
                 <div className="flex p-1 bg-[var(--bg-main)] border border-[var(--border-glass)] rounded-xl">
                   <button
