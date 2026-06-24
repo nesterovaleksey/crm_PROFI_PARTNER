@@ -68,7 +68,18 @@ export default function App() {
     } catch (err) {
       console.error('Error authenticating with Telegram:', err);
       setUser(null);
-      setAuthDebug({ error: err.message });
+      
+      const errorDetails = err ? {
+        name: err.name,
+        message: err.message,
+        status: err.status,
+        code: err.code,
+        details: err.details,
+        hint: err.hint,
+        ...err
+      } : 'Unknown error';
+
+      setAuthDebug({ error: errorDetails });
     } finally {
       setLoading(false);
     }
