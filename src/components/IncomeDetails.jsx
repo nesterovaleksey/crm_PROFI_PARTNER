@@ -129,10 +129,10 @@ export default function IncomeDetails({ data }) {
               </div>
             )}
             
-            <div className="item-row font-bold text-xs mt-2 border-t border-[var(--border-glass)] pt-2">
-              <span className="text-muted">Всего доходов</span>
-              <span className="flex-row gap-2">
-                <span>
+            <div className="item-row mt-2 border-t border-[var(--border-glass)] pt-2">
+              <span className="text-sm font-extrabold text-[var(--text-primary)]">Всего доходов</span>
+              <span className="flex-row gap-2 items-center">
+                <span className="text-sm font-extrabold text-[var(--text-primary)]">
                   {formatCurrency(uberNettoGotowka + boltNettoGotowka + freenowNettoK)}
                 </span>
                 {totalCash !== 0 && (
@@ -186,9 +186,9 @@ export default function IncomeDetails({ data }) {
               </div>
             )}
             
-            <div className="item-row font-bold text-xs mt-2 border-t border-[var(--border-glass)] pt-2">
-              <span className="text-muted">Всего удержано</span>
-              <span className="text-danger">{formatCurrency(totalExpenses)}</span>
+            <div className="item-row mt-2 border-t border-[var(--border-glass)] pt-2">
+              <span className="text-sm font-extrabold text-[var(--text-primary)]">Всего удержано</span>
+              <span className="text-sm font-extrabold text-danger">{formatCurrency(totalExpenses)}</span>
             </div>
           </div>
         </div>

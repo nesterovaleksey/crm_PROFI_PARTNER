@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Check } from 'lucide-react';
 
 export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 4, 15)); // Default to May 2026
   const [hoveredPeriod, setHoveredPeriod] = useState('');
-  const [clickingPeriod, setClickingPeriod] = useState(''); // To keep week highlighted during click animation
+  const [pendingPeriod, setPendingPeriod] = useState(''); // Highlighted but not yet confirmed
 
   // Helper: Find Monday of the week containing the date
   const getMonday = (d) => {
@@ -70,15 +70,17 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
     return days;
   };
 
+  // Click on a day → just highlight the week (pending), no data fetch yet
   const handleDayClick = (pStr) => {
-    // 1. Lock the highlight on the clicked week
-    setClickingPeriod(pStr);
-    
-    // 2. Delay the parent change callback so the highlight is visible for a moment
-    setTimeout(() => {
-      onPeriodChange(pStr);
-      setClickingPeriod('');
-    }, 350); // 350ms delay for visual feedback
+    setPendingPeriod(pStr);
+  };
+
+  // "Выбрать" button → confirm and trigger data fetch
+  const handleConfirm = () => {
+    if (pendingPeriod) {
+      onPeriodChange(pendingPeriod);
+      setPendingPeriod('');
+    }
   };
 
   const daysGrid = generateGridDays();
@@ -87,6 +89,9 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
     'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
     'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
   ];
+
+  // The week to highlight on the grid: pending > hovered > selected
+  const activeHighlight = pendingPeriod || hoveredPeriod;
 
   return (
     <div className="glass-card p-5 relative overflow-hidden">
@@ -98,22 +103,37 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
             Календарь отчетов
           </h3>
         </div>
-        <div className="flex items-center gap-4 bg-[var(--bg-darker)] px-3 py-1.5 rounded-xl border border-[var(--border-glass)]">
-          <button
-            onClick={prevMonth}
-            className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <span className="text-xs font-semibold px-3 min-w-[110px] text-center">
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </span>
-          <button
-            onClick={nextMonth}
-            className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
-          >
-            <ChevronRight size={16} />
-          </button>
+
+        <div className="flex items-center gap-2">
+          {/* Confirm button — appears when a pending week is chosen */}
+          {pendingPeriod && (
+            <button
+              onClick={handleConfirm}
+              className="btn-primary !py-1 !px-3 !text-xs flex items-center gap-1.5 animate-fade-in"
+            >
+              <Check size={13} />
+              Выбрать
+            </button>
+          )}
+
+          {/* Month navigator */}
+          <div className="flex items-center gap-1 bg-[var(--bg-darker)] px-2 py-1.5 rounded-xl border border-[var(--border-glass)]">
+            <button
+              onClick={prevMonth}
+              className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-xs font-semibold px-2 min-w-[100px] text-center">
+              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </span>
+            <button
+              onClick={nextMonth}
+              className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -127,26 +147,26 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
 
         {daysGrid.map((dayDate, idx) => {
           const pStr = getPeriodString(dayDate);
-          const isSelected = selectedPeriod === pStr;
-          // Highlight if hovered, selected, or currently clicked (animating)
-          const isHighlighted = hoveredPeriod === pStr || clickingPeriod === pStr;
+          const isSelected = selectedPeriod === pStr && !pendingPeriod;
+          const isPending = pendingPeriod === pStr;
+          const isHighlighted = activeHighlight === pStr && !isPending && !isSelected;
 
-          let cellClass = 'calendar-cell ';
-          if (!isCurrentMonthActive(dayDate)) cellClass += 'calendar-cell-other ';
-          if (isSelected) cellClass += 'calendar-cell-selected ';
-          else if (isHighlighted) cellClass += 'calendar-cell-active-week ';
-
-          // Helper to check current month
           function isCurrentMonthActive(date) {
             return date.getMonth() === currentDate.getMonth();
           }
+
+          let cellClass = 'calendar-cell ';
+          if (!isCurrentMonthActive(dayDate)) cellClass += 'calendar-cell-other ';
+          if (isPending) cellClass += 'calendar-cell-selected ';
+          else if (isSelected) cellClass += 'calendar-cell-selected ';
+          else if (isHighlighted) cellClass += 'calendar-cell-active-week ';
 
           return (
             <div
               key={idx}
               className={cellClass}
-              onMouseEnter={() => !clickingPeriod && setHoveredPeriod(pStr)}
-              onMouseLeave={() => !clickingPeriod && setHoveredPeriod('')}
+              onMouseEnter={() => !pendingPeriod && setHoveredPeriod(pStr)}
+              onMouseLeave={() => !pendingPeriod && setHoveredPeriod('')}
               onClick={() => handleDayClick(pStr)}
               title={`Выбрать неделю: ${pStr}`}
             >
@@ -156,6 +176,12 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
         })}
       </div>
 
+      {/* Hint text when week is selected but not confirmed */}
+      {pendingPeriod && (
+        <p className="text-[10px] text-[var(--text-dim)] text-center mt-3 animate-fade-in">
+          Нажмите «Выбрать» для загрузки данных
+        </p>
+      )}
     </div>
   );
 }
