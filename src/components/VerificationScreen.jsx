@@ -40,7 +40,7 @@ export default function VerificationScreen({ tgUser, onVerified }) {
       setDriverName(dbDriverName);
 
       // Send code to n8n webhook
-      const n8nWebhookUrl = 'https://primary-production-e36b.up.railway.app/webhook/send-code';
+      const n8nWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
       
       try {
         const response = await fetch(n8nWebhookUrl, {

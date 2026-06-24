@@ -336,6 +336,16 @@ export default function AdminPanel() {
           const zwrotIdx = getColIndex(['Zwrot kosztów', 'Zwrot kosztow']);
           const umowaIdx = getColIndex(['Umowa zlecenie', 'Umowa zlecenie']);
 
+          // New columns indices
+          const imieNazwiskoIdx = indexMap['Imię Nazwisko'];
+          const numerTelIdx = getColIndex(['Numer Tel', 'Numer telefonu', 'Phone']);
+          const emailIdx = getColIndex(['E-mail', 'Email']);
+          const uberBruttoIdx = getColIndex(['Uber Brutto']);
+          const boltBruttoIdx = getColIndex(['Bolt Brutto']);
+          const freenowBruttoIdx = getColIndex(['FreeNow Brutto']);
+          const brutto3AplIdx = getColIndex(['Brutto 3 apl']);
+          const umowaNajmuIdx = getColIndex(['Umowa najmu']);
+
           const incomesToInsert = [];
           const localUnmatched = [];
 
@@ -367,6 +377,11 @@ export default function AdminPanel() {
               return isNaN(val) ? 0 : val;
             };
 
+            const txt = (idx) => {
+              if (idx === -1 || row[idx] === undefined || row[idx] === null) return '';
+              return row[idx].toString().trim();
+            };
+
             incomesToInsert.push({
               driver_id: matchingDriver.id,
               period_name: periodName,
@@ -385,6 +400,16 @@ export default function AdminPanel() {
               do_wyplaty: num(doWyplatyIdx),
               zwrot_kosztow: num(zwrotIdx),
               umowa_zlecenie: num(umowaIdx),
+              
+              // New columns
+              imie_nazwisko: txt(imieNazwiskoIdx),
+              numer_tel: txt(numerTelIdx),
+              email: txt(emailIdx),
+              uber_brutto: num(uberBruttoIdx),
+              bolt_brutto: num(boltBruttoIdx),
+              freenow_brutto: num(freenowBruttoIdx),
+              brutto_3_apl: num(brutto3AplIdx),
+              umowa_najmu: num(umowaNajmuIdx),
             });
           }
 

@@ -15,12 +15,12 @@ export default function App() {
   // 1. Initial Telegram Web App setup
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    if (tg && tg.initData) {
       tg.ready();
       tg.expand();
       setIsTelegram(true);
-      setTgUser(tg.initDataUnsafe.user);
-      checkUser(tg.initDataUnsafe.user.id);
+      setTgUser(tg.initDataUnsafe?.user || null);
+      authenticateWithTelegram(tg.initData);
     } else {
       // Not inside Telegram — production: just show the "open in Telegram" screen
       setIsTelegram(false);
@@ -28,19 +28,39 @@ export default function App() {
     }
   }, []);
 
-  const checkUser = async (telegramId) => {
+  const authenticateWithTelegram = async (initData) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('drivers')
-        .select('*')
-        .eq('telegram_id', telegramId)
-        .maybeSingle();
-
-      if (error) throw error;
-      setUser(data || null);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      const res = await fetch(`${supabaseUrl}/functions/v1/telegram-auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`
+        },
+        body: JSON.stringify({ initData })
+      });
+      
+      if (!res.ok) {
+        throw new Error('Telegram verification failed');
+      }
+      
+      const result = await res.json();
+      
+      if (result.success && result.is_verified && result.access_token) {
+        // Sign in using Custom JWT
+        const { data, error } = await supabase.auth.signInWithCustomToken(result.access_token);
+        if (error) throw error;
+        
+        setUser(result.driver || null);
+      } else {
+        setUser(null);
+      }
     } catch (err) {
-      console.error('Error checking user:', err);
+      console.error('Error authenticating with Telegram:', err);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -85,7 +105,7 @@ export default function App() {
             </div>
           </div>
         ) : !user ? (
-          <VerificationScreen tgUser={tgUser} onVerified={() => checkUser(tgUser.id)} />
+          <VerificationScreen tgUser={tgUser} onVerified={() => authenticateWithTelegram(window.Telegram?.WebApp?.initData)} />
         ) : !user.is_active ? (
           <div className="glass-card p-8 text-center my-10 space-y-5">
             <div className="w-16 h-16 rounded-full bg-[var(--danger-glow)] flex items-center justify-center mx-auto text-[var(--danger)]">
