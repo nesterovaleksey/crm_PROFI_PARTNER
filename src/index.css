@@ -1,0 +1,345 @@
+:root {
+  font-family: 'Montserrat', 'Outfit', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* PROFI Partner Wrocław Brand Color System */
+  --bg-darker: hsl(253, 30%, 8%);   /* Very deep dark violet */
+  --bg-main: hsl(253, 30%, 12%);     /* Base violet */
+  --bg-card: hsla(253, 30%, 16%, 0.7);
+  --bg-card-hover: hsla(253, 30%, 20%, 0.85);
+  
+  --brand-purple: #312362;
+  --accent: #a998e5;               /* Light purple */
+  --accent-light: #e0b8f5;         /* Hover pinkish purple */
+  
+  --accent-gradient: linear-gradient(135deg, var(--brand-purple), var(--accent));
+  --accent-glow: rgba(169, 152, 229, 0.35);
+  
+  --border-glass: rgba(169, 152, 229, 0.1);
+  --border-glow: rgba(169, 152, 229, 0.4);
+  
+  --text-main: #f2eded;
+  --text-muted: #d0c8e8;
+  --text-dim: #9b92b6;
+  
+  --success: hsl(150, 84%, 43%);
+  --success-glow: hsla(150, 84%, 43%, 0.2);
+  
+  --danger: hsl(355, 90%, 61%);
+  --danger-glow: hsla(355, 90%, 61%, 0.2);
+  
+  --warning: hsl(38, 92%, 58%);
+  --warning-glow: hsla(38, 92%, 58%, 0.2);
+  
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg-darker);
+  background-image: 
+    radial-gradient(circle at 100% 0%, rgba(49, 35, 98, 0.35) 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(169, 152, 229, 0.15) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Structural Layout Classes (Vanilla CSS replacing Tailwind utility classes) */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .grid-2-col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-glass);
+}
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.divider {
+  border-top: 1px solid var(--border-glass);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+/* Margin and Padding Utilities */
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 20px; }
+.mb-6 { margin-bottom: 24px; }
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 20px; }
+.mt-6 { margin-top: 24px; }
+
+.ml-1 { margin-left: 4px; }
+.ml-2 { margin-left: 8px; }
+
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+.pb-3 { padding-bottom: 12px; }
+.pb-10 { padding-bottom: 40px; }
+.pt-6 { padding-top: 24px; }
+
+/* Text Utilities */
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.text-md { font-size: 15px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
+.text-4xl { font-size: 36px; }
+
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-extrabold { font-weight: 800; }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.uppercase { text-transform: uppercase; }
+.tracking-wider { letter-spacing: 0.5px; }
+.tracking-widest { letter-spacing: 2px; }
+
+/* Color Utilities */
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-accent { color: var(--accent); }
+.text-accent-light { color: var(--accent-light); }
+
+/* Glassmorphism Panel */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 12px 40px 0 rgba(169, 152, 229, 0.1);
+}
+
+/* Premium Buttons */
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px var(--accent-glow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  outline: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(169, 152, 229, 0.5);
+  filter: brightness(1.1);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  color: var(--text-dim);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.btn-secondary {
+  background: rgba(169, 152, 229, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(169, 152, 229, 0.1);
+  border-color: var(--text-muted);
+}
+
+/* Premium Inputs */
+.input-field {
+  width: 100%;
+  background: rgba(20, 16, 33, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: var(--text-main);
+  font-size: 15px;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(169, 152, 229, 0.15);
+  background: rgba(20, 16, 33, 0.9);
+}
+
+/* Animated Calendar Styling */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 8px 0;
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+}
+
+.calendar-cell-other {
+  color: var(--text-dim);
+  opacity: 0.3;
+}
+
+.calendar-cell-active-week {
+  background: rgba(169, 152, 229, 0.15) !important;
+  color: var(--text-main);
+}
+
+.calendar-cell-selected {
+  background: var(--accent-gradient) !important;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.calendar-cell:hover {
+  background: rgba(169, 152, 229, 0.08);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(169, 152, 229, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(169, 152, 229, 0.45);
+  }
+}
+
+.premium-glow {
+  animation: pulseGlow 3s infinite;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}

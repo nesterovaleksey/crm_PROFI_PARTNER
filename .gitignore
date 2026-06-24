@@ -1,0 +1,25 @@
+# Secrets & env
+.secrets
+.env*
+SYSTEM_INSTRUCTION*
+
+# Skills (internal tool files)
+skills/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Cloudflare tunnel
+cloudflared.exe
+cloudflared.log
+
+# Excel / temp files
+*.xlsx
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db

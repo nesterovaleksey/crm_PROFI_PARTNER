@@ -1,0 +1,91 @@
+{
+  "name": "PROFI_CRM_Send_Verification_Code",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-code",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-node",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "fromEmail": "PROFI CRM <n8nesterov@gmail.com>",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "=PROFI CRM: Код авторизации {{ $json.body.code }}",
+        "html": "=<h3>Здравствуйте, {{ $json.body.name }}!</h3><p>Ваш одноразовый пароль для входа в приложение <b>PROFI CRM</b>:</p><h2 style=\"font-size: 28px; letter-spacing: 3px; color: #0070f3; font-family: monospace;\">{{ $json.body.code }}</h2><p>Пароль действителен в течение 10 минут. Не передавайте его третьим лицам.</p><br/><hr/><p style=\"font-size: 11px; color: #888;\">Это автоматическое сообщение от системы PROFI CRM. Пожалуйста, не отвечайте на него.</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "email-node",
+      "name": "Send Email",
+      "credentials": {
+        "smtp": {
+          "id": "smtp-credentials-id",
+          "name": "SMTP (Gmail/Yandex)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Verification email sent successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "respond-node",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "active": true,
+  "pinData": {}
+}
