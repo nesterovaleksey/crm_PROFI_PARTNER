@@ -11,7 +11,15 @@ INSERT INTO auth.users (
     created_at,
     updated_at,
     is_sso_user,
-    is_anonymous
+    is_anonymous,
+    confirmation_token,
+    recovery_token,
+    email_change_token_new,
+    email_change,
+    phone_change,
+    phone_change_token,
+    email_change_token_current,
+    reauthentication_token
 )
 SELECT 
     '00000000-0000-0000-0000-000000000000'::uuid,
@@ -25,7 +33,15 @@ SELECT
     now(),
     now(),
     false,
-    false
+    false,
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
 FROM public.drivers d
 WHERE NOT EXISTS (
     SELECT 1 FROM auth.users u WHERE u.id = d.id
@@ -52,7 +68,15 @@ BEGIN
             created_at,
             updated_at,
             is_sso_user,
-            is_anonymous
+            is_anonymous,
+            confirmation_token,
+            recovery_token,
+            email_change_token_new,
+            email_change,
+            phone_change,
+            phone_change_token,
+            email_change_token_current,
+            reauthentication_token
         )
         VALUES (
             '00000000-0000-0000-0000-000000000000'::uuid,
@@ -66,7 +90,15 @@ BEGIN
             now(),
             now(),
             false,
-            false
+            false,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
         )
         ON CONFLICT (id) DO NOTHING;
     ELSIF TG_OP = 'UPDATE' THEN
