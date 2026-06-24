@@ -2,6 +2,7 @@
 .secrets
 .env*
 SYSTEM_INSTRUCTION*
+danger.txt
 
 # Skills (internal tool files)
 skills/

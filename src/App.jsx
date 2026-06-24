@@ -50,8 +50,11 @@ export default function App() {
       const result = await res.json();
       
       if (result.success && result.is_verified && result.access_token) {
-        // Sign in using Custom JWT
-        const { data, error } = await supabase.auth.signInWithCustomToken(result.access_token);
+        // Sign in using Custom JWT session
+        const { data, error } = await supabase.auth.setSession({
+          access_token: result.access_token,
+          refresh_token: result.access_token
+        });
         if (error) throw error;
         
         setUser(result.driver || null);
