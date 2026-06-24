@@ -1,7 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts'
-import * as base64 from 'https://deno.land/x/base64@v0.2.1/mod.ts'
+
 import { create } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
 
 const corsHeaders = {
@@ -38,9 +37,28 @@ serve(async (req) => {
     paramsArray.sort()
     const dataCheckString = paramsArray.join('\n')
 
-    // HMAC-SHA256
-    const secretKey = hmac('sha256', 'WebAppData', botToken, 'utf8', 'buffer')
-    const calculatedHash = hmac('sha256', secretKey, dataCheckString, 'buffer', 'hex')
+// HMAC-SHA256 using Web Crypto API
+    const encoder = new TextEncoder()
+    const botTokenKey = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode('WebAppData'),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
+    const secretKeyBuf = await crypto.subtle.sign('HMAC', botTokenKey, encoder.encode(botToken))
+
+    const secretKey = await crypto.subtle.importKey(
+      'raw',
+      secretKeyBuf,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
+    const hashBuf = await crypto.subtle.sign('HMAC', secretKey, encoder.encode(dataCheckString))
+    const calculatedHash = Array.from(new Uint8Array(hashBuf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
 
     if (calculatedHash !== hash) {
       throw new Error('Invalid Telegram initData signature')
@@ -77,13 +95,12 @@ serve(async (req) => {
     }
 
     // 3. Generate Custom JWT
-    const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET')
+    const jwtSecret = Deno.env.get('JWT_SECRET') || Deno.env.get('SUPABASE_JWT_SECRET')
     if (!jwtSecret) {
-      throw new Error('Server configuration error: missing SUPABASE_JWT_SECRET')
+      throw new Error('Server configuration error: missing JWT_SECRET / SUPABASE_JWT_SECRET')
     }
 
     // Convert secret string to CryptoKey for djwt
-    const encoder = new TextEncoder()
     const keyBuf = encoder.encode(jwtSecret)
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
