@@ -96,44 +96,46 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
   return (
     <div className="glass-card p-5 relative overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex-between mb-4">
+        <div className="flex-row gap-2">
           <Calendar className="text-[var(--accent)]" size={20} />
           <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">
             Календарь отчетов
           </h3>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Confirm button — appears when a pending week is chosen */}
+        {/* Confirm button — appears when a pending week is chosen */}
+        <div className="flex-row">
           {pendingPeriod && (
             <button
               onClick={handleConfirm}
-              className="btn-primary !py-1 !px-3 !text-xs flex items-center gap-1.5 animate-fade-in"
+              className="btn-primary btn-xs flex-row gap-1.5 animate-fade-in"
             >
-              <Check size={13} />
-              Выбрать
+              <Check size={14} />
+              <span>Выбрать</span>
             </button>
           )}
+        </div>
+      </div>
 
-          {/* Month navigator */}
-          <div className="flex items-center gap-1 bg-[var(--bg-darker)] px-2 py-1.5 rounded-xl border border-[var(--border-glass)]">
-            <button
-              onClick={prevMonth}
-              className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-xs font-semibold px-2 min-w-[100px] text-center">
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </span>
-            <button
-              onClick={nextMonth}
-              className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+      {/* Month Selector centered */}
+      <div className="flex-center mb-4">
+        <div className="flex-row gap-1 bg-[var(--bg-darker)] px-2 py-1.5 rounded-xl border border-[var(--border-glass)]">
+          <button
+            onClick={prevMonth}
+            className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-xs font-semibold px-2 min-w-[100px] text-center select-none">
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </span>
+          <button
+            onClick={nextMonth}
+            className="p-1.5 hover:bg-[var(--bg-card)] rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--accent)]"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
       </div>
 

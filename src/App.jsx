@@ -23,7 +23,6 @@ export default function App() {
       setTgUser(tg.initDataUnsafe?.user || null);
       authenticateWithTelegram(tg.initData);
     } else {
-      // Not inside Telegram — production: just show the "open in Telegram" screen
       setIsTelegram(false);
       setLoading(false);
     }
