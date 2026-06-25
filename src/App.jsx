@@ -29,8 +29,21 @@ export default function App() {
     }
   }, []);
 
-  const authenticateWithTelegram = async (initData) => {
-    setLoading(true);
+  // 2. Background session refresh (every 4 hours)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const tg = window.Telegram?.WebApp;
+      if (tg && tg.initData) {
+        authenticateWithTelegram(tg.initData, true);
+      }
+    }, 4 * 60 * 60 * 1000); // 4 hours
+    return () => clearInterval(interval);
+  }, []);
+
+  const authenticateWithTelegram = async (initData, isBackground = false) => {
+    if (!isBackground) {
+      setLoading(true);
+    }
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -81,7 +94,9 @@ export default function App() {
 
       setAuthDebug({ error: errorDetails });
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
     }
   };
 

@@ -3,12 +3,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 
 import { create } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get('origin')
+  const allowedOrigins = [
+    'https://crm-profi-partner.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
+  ]
+  const allowOrigin = (origin && allowedOrigins.includes(origin)) ? origin : 'https://crm-profi-partner.vercel.app'
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -87,29 +99,9 @@ serve(async (req) => {
     if (error) throw error
     if (!driver || !driver.is_active) {
       console.log("Edge Function: Driver not found or inactive. Returning is_verified: false");
-      
-      // Fetch a sample of drivers to see if we can find them and check their values
-      const { data: allDrivers } = await supabase
-        .from('drivers')
-        .select('id, full_name, telegram_id, is_active')
-        .limit(10);
-
       return new Response(JSON.stringify({ 
         success: true, 
-        is_verified: false,
-        driver: driver || null,
-        debug: {
-          telegramId,
-          telegramIdType: typeof telegramId,
-          tgUser,
-          allDriversCount: allDrivers ? allDrivers.length : 0,
-          allDriversSample: allDrivers || [],
-          envKeys: {
-            hasUrl: !!supabaseUrl,
-            hasServiceKey: !!serviceRoleKey,
-            hasJwtSecret: !!Deno.env.get('JWT_SECRET')
-          }
-        }
+        is_verified: false
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
