@@ -66,7 +66,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               chat_id: chatId,
-              text: 'Для входа в личный кабинет перейдите в личный диалог со мной:',
+              text: 'Для входа в личный кабинет перейдите по ссылке или нажмите на кнопку ниже:\n👉 https://t.me/Floristika2026Bot?start=crm',
               reply_markup: {
                 inline_keyboard: [
                   [
@@ -98,7 +98,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               chat_id: chatId,
-              text: 'Для входа в личный кабинет нажмите на кнопку ниже:',
+              text: 'Для входа в личный кабинет перейдите по ссылке или нажмите на кнопку ниже:\n👉 https://t.me/Floristika2026Bot?start=crm',
               reply_markup: {
                 inline_keyboard: [
                   [
