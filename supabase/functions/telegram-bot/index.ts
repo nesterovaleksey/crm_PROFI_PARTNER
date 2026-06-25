@@ -1,6 +1,23 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 serve(async (req) => {
+  if (req.method === 'GET') {
+    const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`)
+      const data = await res.json()
+      return new Response(JSON.stringify({ success: true, bot_info: data }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    } catch (err) {
+      return new Response(JSON.stringify({ success: false, error: err.message }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+  }
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: {
@@ -53,6 +70,12 @@ serve(async (req) => {
 
         const resData = await response.json()
         console.log("Telegram API Response:", JSON.stringify(resData))
+        if (!resData.ok) {
+          return new Response(JSON.stringify({ success: false, error: "Telegram API error", details: resData }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          })
+        }
       }
     }
 
