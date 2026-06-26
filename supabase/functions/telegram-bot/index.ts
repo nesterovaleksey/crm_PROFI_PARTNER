@@ -45,9 +45,10 @@ serve(async (req) => {
       console.error("Error logging to database:", dbError)
     }
 
+    const ALLOWED_USERS = [999999, 2124107193, 445303225]; // ID администраторов
     const fromId = update.message?.from?.id || update.callback_query?.from?.id;
     let isAdmin = false;
-    if (fromId) {
+    if (fromId && ALLOWED_USERS.includes(Number(fromId))) {
       const { data: senderDriver } = await supabase
         .from('drivers')
         .select('is_admin')
@@ -235,6 +236,9 @@ serve(async (req) => {
         if (imieNazwiskoIdx === -1) {
           throw new Error('Колонка "Imię Nazwisko" не найдена в таблице Excel.');
         }
+        if (doWyplatyIdx === -1) {
+          throw new Error('Колонка "Do wypłaty" не найдена в таблице Excel.');
+        }
 
         // Helper to extract period
         const parsePeriodFromFilename = (fname: string): string => {
@@ -260,10 +264,20 @@ serve(async (req) => {
             continue;
           }
 
-          const num = (idx: number) => {
-            if (idx === -1 || row[idx] === undefined || row[idx] === null) return 0;
-            const val = parseFloat(row[idx].toString().replace(',', '.'));
-            return isNaN(val) ? 0 : val;
+          if (!driverFio) {
+            throw new Error(`Ошибка в строке ${i + 1}: поле "Imię Nazwisko" не может быть пустым.`);
+          }
+
+          const validateNum = (idx: number, colName: string) => {
+            if (idx === -1 || row[idx] === undefined || row[idx] === null || row[idx].toString().trim() === '') {
+              return 0;
+            }
+            const valStr = row[idx].toString().replace(',', '.').trim();
+            const val = parseFloat(valStr);
+            if (isNaN(val)) {
+              throw new Error(`Ошибка в строке ${i + 1}: поле "${colName}" должно быть числом (найдено: "${row[idx]}").`);
+            }
+            return val;
           };
 
           const txt = (idx: number) => {
@@ -274,29 +288,29 @@ serve(async (req) => {
           incomesToInsert.push({
             period_name: periodName,
             file_name: filename,
-            uber_netto_gotowka: num(uberGotowkaIdx),
-            uber_netto: num(uberIdx),
-            bolt_netto_gotowka: num(boltGotowkaIdx),
-            bolt_netto: num(boltIdx),
-            freenow_netto_k: num(freenowKIdx),
-            freenow_netto_l: num(freenowLIdx),
-            vat: num(vatIdx),
-            partner: num(partnerIdx),
-            auto: num(autoIdx),
-            korekty: num(korektyIdx),
-            zus: num(zusIdx),
-            do_wyplaty: num(doWyplatyIdx),
-            zwrot_kosztow: num(zwrotIdx),
-            umowa_zlecenie: num(umowaIdx),
+            uber_netto_gotowka: validateNum(uberGotowkaIdx, 'Uber Netto (gotówka)'),
+            uber_netto: validateNum(uberIdx, 'Uber Netto'),
+            bolt_netto_gotowka: validateNum(boltGotowkaIdx, 'Bolt Netto (gotówka)'),
+            bolt_netto: validateNum(boltIdx, 'Bolt Netto'),
+            freenow_netto_k: validateNum(freenowKIdx, 'FreeNow Netto k'),
+            freenow_netto_l: validateNum(freenowLIdx, 'FreeNow Netto l'),
+            vat: validateNum(vatIdx, 'VAT'),
+            partner: validateNum(partnerIdx, 'Partner'),
+            auto: validateNum(autoIdx, 'Auto'),
+            korekty: validateNum(korektyIdx, 'Korekty'),
+            zus: validateNum(zusIdx, 'ZUS'),
+            do_wyplaty: validateNum(doWyplatyIdx, 'Do wypłaty'),
+            zwrot_kosztow: validateNum(zwrotIdx, 'Zwrot kosztów'),
+            umowa_zlecenie: validateNum(umowaIdx, 'Umowa zlecenie'),
             
-            imie_nazwisko: txt(imieNazwiskoIdx),
+            imie_nazwisko: driverFio,
             numer_tel: txt(numerTelIdx),
             email: txt(emailIdx),
-            uber_brutto: num(uberBruttoIdx),
-            bolt_brutto: num(boltBruttoIdx),
-            freenow_brutto: num(freenowBruttoIdx),
-            brutto_3_apl: num(brutto3AplIdx),
-            umowa_najmu: num(umowaNajmuIdx),
+            uber_brutto: validateNum(uberBruttoIdx, 'Uber Brutto'),
+            bolt_brutto: validateNum(boltBruttoIdx, 'Bolt Brutto'),
+            freenow_brutto: validateNum(freenowBruttoIdx, 'FreeNow Brutto'),
+            brutto_3_apl: validateNum(brutto3AplIdx, 'Brutto 3 apl'),
+            umowa_najmu: validateNum(umowaNajmuIdx, 'Umowa najmu'),
           });
         }
 
