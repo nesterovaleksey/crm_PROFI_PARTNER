@@ -1,26 +1,9 @@
 // @ts-nocheck
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import * as XLSX from 'npm:xlsx@0.18.5'
+import * as XLSX from 'npm:@e965/xlsx@0.20.2'
 
 serve(async (req) => {
-  if (req.method === 'GET') {
-    const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`)
-      const data = await res.json()
-      return new Response(JSON.stringify({ success: true, bot_info: data }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 200,
-      })
-    } catch (err) {
-      return new Response(JSON.stringify({ success: false, error: err.message }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 200,
-      })
-    }
-  }
-
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: {
@@ -28,6 +11,14 @@ serve(async (req) => {
         'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
       }
     })
+  }
+
+  // 1. Verify Telegram Webhook Secret Token
+  const secretToken = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || Deno.env.get('TELEGRAM_BOT_TOKEN')
+  const receivedToken = req.headers.get('X-Telegram-Bot-Api-Secret-Token')
+  if (!receivedToken || receivedToken !== secretToken) {
+    console.error("Unauthorized webhook request. Received token:", receivedToken)
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
   }
 
   try {

@@ -12,7 +12,6 @@ export default function App() {
   const [tgUser, setTgUser] = useState(null); // tg user from Telegram SDK
   const [isTelegram, setIsTelegram] = useState(false);
   const [activeTab, setActiveTab] = useState('driver'); // 'driver' or 'admin'
-  const [authDebug, setAuthDebug] = useState(null);
   const [showShortcutModal, setShowShortcutModal] = useState(false);
 
   // 1. Initial Telegram Web App setup
@@ -96,27 +95,11 @@ export default function App() {
         if (error) throw error;
         
         setUser(result.driver || null);
-      } else {
-        setUser(null);
-        if (result.debug) {
-          setAuthDebug(result.debug);
-        }
+      setUser(null);
       }
     } catch (err) {
       console.error('Error authenticating with Telegram:', err);
       setUser(null);
-      
-      const errorDetails = err ? {
-        name: err.name,
-        message: err.message,
-        status: err.status,
-        code: err.code,
-        details: err.details,
-        hint: err.hint,
-        ...err
-      } : 'Unknown error';
-
-      setAuthDebug({ error: errorDetails });
     } finally {
       if (!isBackground) {
         setLoading(false);
@@ -165,12 +148,6 @@ export default function App() {
         ) : !user ? (
           <div className="space-y-4">
             <VerificationScreen tgUser={tgUser} onVerified={() => authenticateWithTelegram(window.Telegram?.WebApp?.initData)} />
-            {authDebug && (
-              <div className="glass-card p-4 text-xs font-mono text-left bg-red-950/20 border border-red-900/50 rounded-xl space-y-2 overflow-auto max-h-60">
-                <p className="font-bold text-red-400">Диагностика авторизации:</p>
-                <pre className="text-[10px] text-red-200">{JSON.stringify(authDebug, null, 2)}</pre>
-              </div>
-            )}
           </div>
         ) : !user.is_active ? (
           <div className="glass-card p-8 text-center my-10 space-y-5">
