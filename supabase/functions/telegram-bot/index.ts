@@ -45,10 +45,9 @@ serve(async (req) => {
       console.error("Error logging to database:", dbError)
     }
 
-    const ALLOWED_USERS = [999999, 2124107193, 445303225]; // ID администраторов
     const fromId = update.message?.from?.id || update.callback_query?.from?.id;
     let isAdmin = false;
-    if (fromId && ALLOWED_USERS.includes(Number(fromId))) {
+    if (fromId) {
       const { data: senderDriver } = await supabase
         .from('drivers')
         .select('is_admin')
