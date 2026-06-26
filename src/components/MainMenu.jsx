@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import IncomeDetails from './IncomeDetails';
 import CalendarSelector from './CalendarSelector';
-import { RefreshCw, Inbox, CalendarRange, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Inbox, CalendarRange, ChevronDown, ChevronUp, Smartphone } from 'lucide-react';
 
 export default function MainMenu({ driver }) {
   const [selectedPeriod, setSelectedPeriod] = useState('');
@@ -111,6 +111,14 @@ export default function MainMenu({ driver }) {
     setCalendarOpen(false);
   };
 
+  const isShortcutSupported = !!(window.Telegram?.WebApp?.checkHomeScreenStatus && window.Telegram?.WebApp?.addToHomeScreen);
+
+  const handleInstallShortcut = () => {
+    if (window.Telegram?.WebApp?.addToHomeScreen) {
+      window.Telegram.WebApp.addToHomeScreen();
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-col flex-center py-16">
@@ -157,6 +165,29 @@ export default function MainMenu({ driver }) {
             selectedPeriod={selectedPeriod}
             onPeriodChange={handlePeriodChange}
           />
+        </div>
+      )}
+
+      {/* Manual Shortcut Installation Banner */}
+      {isShortcutSupported && (
+        <div 
+          onClick={handleInstallShortcut}
+          className="glass-card p-4 flex-between border-l-2 border-l-accent mt-3 cursor-pointer hover:border-l-accent-light transition-all select-none animate-fade-in"
+        >
+          <div className="flex-row gap-3">
+            <Smartphone className="text-accent" size={22} />
+            <div className="flex-col">
+              <span className="text-[10px] text-dim font-bold uppercase tracking-wider block">
+                Ярлык на рабочем столе
+              </span>
+              <span className="text-sm font-semibold text-main">
+                Добавить для быстрого входа 🔑
+              </span>
+            </div>
+          </div>
+          <div className="flex-row gap-2">
+            <span className="text-xs text-dim">Установить</span>
+          </div>
         </div>
       )}
 

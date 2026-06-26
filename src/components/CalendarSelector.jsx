@@ -96,26 +96,25 @@ export default function CalendarSelector({ selectedPeriod, onPeriodChange }) {
   return (
     <div className="glass-card p-5 relative overflow-hidden">
       {/* Header */}
-      <div className="flex-between mb-4">
-        <div className="flex-row gap-2">
+      <div className="mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
           <Calendar className="text-[var(--accent)]" size={20} />
-          <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]" style={{ margin: 0 }}>
             Календарь отчетов
           </h3>
         </div>
 
         {/* Confirm button — appears when a pending week is chosen */}
-        <div className="flex-row">
-          {pendingPeriod && (
-            <button
-              onClick={handleConfirm}
-              className="btn-primary btn-xs flex-row gap-1.5 animate-fade-in"
-            >
-              <Check size={14} />
-              <span>Выбрать</span>
-            </button>
-          )}
-        </div>
+        {pendingPeriod && (
+          <button
+            onClick={handleConfirm}
+            className="btn-primary btn-xs animate-fade-in"
+            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+          >
+            <Check size={14} />
+            <span>Выбрать</span>
+          </button>
+        )}
       </div>
 
       {/* Month Selector centered */}

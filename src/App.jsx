@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient';
 import VerificationScreen from './components/VerificationScreen';
 import MainMenu from './components/MainMenu';
 import AdminPanel from './components/AdminPanel';
+import ShortcutModal from './components/ShortcutModal';
 import { RefreshCw, ShieldAlert, Send } from 'lucide-react';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
   const [isTelegram, setIsTelegram] = useState(false);
   const [activeTab, setActiveTab] = useState('driver'); // 'driver' or 'admin'
   const [authDebug, setAuthDebug] = useState(null);
+  const [showShortcutModal, setShowShortcutModal] = useState(false);
 
   // 1. Initial Telegram Web App setup
   useEffect(() => {
@@ -38,6 +40,29 @@ export default function App() {
     }, 4 * 60 * 60 * 1000); // 4 hours
     return () => clearInterval(interval);
   }, []);
+
+  // 3. Check Telegram WebApp home screen status on successful login
+  useEffect(() => {
+    if (user && user.is_active) {
+      const tg = window.Telegram?.WebApp;
+      const isAlreadyDismissed = localStorage.getItem('dismissed_shortcut_prompt') === 'true';
+      
+      if (tg && tg.checkHomeScreenStatus && tg.addToHomeScreen && !isAlreadyDismissed) {
+        const timer = setTimeout(() => {
+          try {
+            tg.checkHomeScreenStatus((status) => {
+              if (status === 'missed') {
+                setShowShortcutModal(true);
+              }
+            });
+          } catch (e) {
+            console.error("Error checking home screen status:", e);
+          }
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user]);
 
   const authenticateWithTelegram = async (initData, isBackground = false) => {
     if (!isBackground) {
@@ -208,6 +233,11 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <ShortcutModal 
+        isOpen={showShortcutModal} 
+        onClose={() => setShowShortcutModal(false)} 
+      />
     </div>
   );
 }
